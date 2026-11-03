@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Кто хочет стать миллионером? — IT & Finance</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <meta name="theme-color" content="#7b5cff">
+<style>
+:root{
+  --bg:#0a0620;
+  --bg2:#120a2e;
+  --panel:#150c33;
+  --panel2:#1c1145;
+  --neon:#7b5cff;
+  --neon2:#b06cff;
+  --cyan:#4de3ff;
+  --text:#f0eaff;
+  --muted:#8a7fb8;
+  --gold:#ffd23f;
+  --danger:#ff4d6d;
+  --good:#3ddc97;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:radial-gradient(circle at 20% 10%,#1a0b4a 0%,transparent 40%),
+             radial-gradient(circle at 80% 90%,#2a0b5a 0%,transparent 45%),
+             var(--bg);
+  color:var(--text);
+  font-family:'Segoe UI',Inter,system-ui,-apple-system,sans-serif;
+  overflow:hidden;
+  min-height:100vh;
+}
+body::before{
+  content:"";position:fixed;inset:-20%;
+  background:radial-gradient(circle at 30% 30%,#7b5cff22,transparent 25%),
+             radial-gradient(circle at 70% 70%,#b06cff22,transparent 25%);
+  animation:bgMove 18s ease-in-out infinite alternate;
+  pointer-events:none;z-index:0;
+}
+@keyframes bgMove{to{transform:scale(1.15) rotate(8deg)}}
+
+.screen{
+  position:fixed;inset:0;display:none;
+  flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;z-index:1;overflow-y:auto;
+}
+.screen.active{display:flex;animation:fadeIn .5s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
+
+/* ===== МЕНЮ ===== */
+#menu .logo{
+  font-size:clamp(28px,5vw,52px);
+  font-weight:900;letter-spacing:-.02em;
+  background:linear-gradient(135deg,var(--neon),var(--cyan),var(--neon2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-align:center;margin-bottom:10px;
+  filter:drop-shadow(0 0 20px #7b5cff88);
+}
+#menu .sub{color:var(--muted);font-size:14px;letter-spacing:.3em;text-transform:uppercase;margin-bottom:44px}
+.menu-btn{
+  display:block;width:min(340px,80vw);padding:18px 24px;margin:10px 0;
+  background:linear-gradient(135deg,#1c1145,#2a1a6b);
+  border:1.5px solid #3d2a7a;border-radius:14px;
+  color:var(--text);font-size:17px;font-weight:700;cursor:pointer;
+  transition:.25s;letter-spacing:.02em;
+}
+.menu-btn:hover{
+  transform:translateY(-3px);
+  border-color:var(--neon);
+  box-shadow:0 0 30px #7b5cff66,0 8px 20px #00000088;
+}
+.menu-btn.primary{
+  background:linear-gradient(135deg,var(--neon),var(--neon2));
+  border-color:transparent;color:#fff;
+  box-shadow:0 0 30px #7b5cff55;
+}
+.menu-btn.primary:hover{box-shadow:0 0 45px #7b5cff99}
+.author{
+  margin-top:44px;color:var(--muted);font-size:13px;letter-spacing:.15em;
+}
+.author b{color:var(--neon2)}
+
+/* ===== ИГРА ===== */
+#game{padding:0;justify-content:flex-start}
+.topbar{
+  position:absolute;top:0;left:0;right:0;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 24px;z-index:10;
+}
+.take-btn{
+  background:#1a0f40;border:1.5px solid var(--gold);color:var(--gold);
+  padding:10px 16px;border-radius:10px;font-weight:800;font-size:13px;
+  cursor:pointer;transition:.2s;letter-spacing:.03em;
+}
+.take-btn:hover{background:var(--gold);color:#0a0620;box-shadow:0 0 25px #ffd23f77}
+.take-btn:disabled{opacity:.3;cursor:not-allowed;box-shadow:none;background:#1a0f40;color:var(--gold)}
+.info-bar{display:flex;gap:14px;align-items:center}
+.chip{
+  background:#150c33;border:1px solid #3d2a7a;padding:8px 14px;border-radius:10px;
+  font-size:13px;font-weight:700;color:var(--text);
+}
+.chip b{color:var(--cyan)}
+.timer-chip.warn{border-color:var(--danger);color:var(--danger);animation:pulse .8s infinite}
+@keyframes pulse{50%{opacity:.5}}
+
+/* Сдвинули игровую область чуть выше */
+.main-area{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:40px 24px 100px;width:100%;max-width:1000px;
+  transform: translateY(-10vh); 
+}
+.q-progress{
+  color:var(--muted);font-size:13px;letter-spacing:.2em;
+  text-transform:uppercase;margin-bottom:14px;
+}
+.q-number{
+  font-size:14px;color:var(--cyan);font-weight:800;letter-spacing:.3em;
+  margin-bottom:8px;
+}
+.q-text{
+  font-size:clamp(19px,2.4vw,27px);font-weight:700;line-height:1.4;
+  text-align:center;max-width:780px;margin-bottom:36px;
+  min-height:70px;display:flex;align-items:center;
+  animation:qIn .5s ease;
+}
+@keyframes qIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
+
+.answers{
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;
+  width:100%;max-width:820px;
+}
+.answer{
+  display:flex;align-items:center;gap:14px;
+  padding:16px 20px;border-radius:14px;
+  background:linear-gradient(135deg,#150c33,#1c1145);
+  border:1.5px solid #3d2a7a;cursor:pointer;
+  color:var(--text);font-size:16px;font-weight:600;text-align:left;
+  transition:.2s;position:relative;overflow:hidden;
+}
+.answer:hover{border-color:var(--neon);transform:translateY(-2px);box-shadow:0 0 25px #7b5cff44}
+.answer .key{
+  width:32px;height:32px;flex-shrink:0;border-radius:8px;
+  background:#2a1a6b;display:flex;align-items:center;justify-content:center;
+  font-weight:900;color:var(--cyan);border:1px solid #4d3a9a;
+}
+.answer.correct{background:linear-gradient(135deg,#0d3d2a,#0a5238);border-color:var(--good);box-shadow:0 0 30px #3ddc9766}
+.answer.correct .key{background:var(--good);color:#0a0620;border-color:var(--good)}
+.answer.wrong{background:linear-gradient(135deg,#3d0d1a,#520a1f);border-color:var(--danger);box-shadow:0 0 30px #ff4d6d66}
+.answer.wrong .key{background:var(--danger);color:#fff;border-color:var(--danger)}
+.answer.hidden{opacity:.15;pointer-events:none}
+.answer:disabled{cursor:default;pointer-events:none}
+
+/* ===== ПОДСКАЗКИ ===== */
+.hints{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  display:flex;gap:10px;z-index:10;
+}
+.hint-btn{
+  width:52px;height:52px;border-radius:12px;
+  background:#150c33;border:1.5px solid #3d2a7a;
+  color:var(--cyan);font-size:20px;cursor:pointer;transition:.2s;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+.hint-btn:hover:not(:disabled){border-color:var(--neon);box-shadow:0 0 20px #7b5cff66;transform:translateY(-2px)}
+.hint-btn:disabled{opacity:.25;cursor:not-allowed}
+.hint-btn .count{
+  position:absolute;top:-6px;right:-6px;background:var(--neon);
+  color:#fff;font-size:11px;font-weight:900;width:20px;height:20px;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+}
+
+/* ===== РЕЗУЛЬТАТ ===== */
+#result .res-title{font-size:clamp(26px,4vw,42px);font-weight:900;margin-bottom:16px;text-align:center}
+#result .res-title.win{color:var(--gold);filter:drop-shadow(0 0 25px #ffd23f88)}
+#result .res-title.lose{color:var(--danger);filter:drop-shadow(0 0 25px #ff4d6d66)}
+#result .res-sum{
+  font-size:clamp(32px,6vw,64px);font-weight:900;color:var(--cyan);
+  margin-bottom:10px;filter:drop-shadow(0 0 25px #4de3ff55);
+}
+#result .res-note{color:var(--muted);margin-bottom:36px;font-size:15px;text-align:center;max-width:500px}
+
+/* ===== РЕКОРДЫ ===== */
+#records .res-title{font-size:32px;font-weight:900;margin-bottom:24px;color:var(--cyan)}
+.rec-list{width:min(420px,90vw);margin-bottom:30px}
+.rec-item{
+  display:flex;justify-content:space-between;padding:14px 18px;
+  background:#150c33;border:1px solid #3d2a7a;border-radius:10px;
+  margin-bottom:8px;font-size:15px;
+}
+.rec-item .pos{color:var(--neon2);font-weight:900}
+.rec-item .money{color:var(--gold);font-weight:800}
+.rec-empty{color:var(--muted);text-align:center;padding:30px}
+
+/* ===== МОДАЛКА ===== */
+.modal{
+  position:fixed;inset:0;background:#0a0620dd;backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;z-index:50;padding:20px;
+}
+.modal.active{display:flex;animation:fadeIn .3s ease}
+.modal-card{
+  background:linear-gradient(135deg,#150c33,#1c1145);
+  border:1.5px solid var(--neon);border-radius:18px;
+  padding:28px;max-width:440px;width:100%;
+  box-shadow:0 0 60px #7b5cff44;
+}
+.modal-card h3{color:var(--cyan);margin-bottom:14px;font-size:20px}
+.modal-card p{color:var(--text);line-height:1.5;font-size:16px}
+.modal-card .close{
+  margin-top:22px;width:100%;padding:12px;
+  background:var(--neon);border:none;border-radius:10px;
+  color:#fff;font-weight:800;font-size:15px;cursor:pointer;
+}
+.modal-card .close:hover{filter:brightness(1.15)}
+
+@media(max-width:700px){
+  .answers{grid-template-columns:1fr;gap:10px}
+  .answer{padding:13px 16px;font-size:14px}
+  .q-text{min-height:60px;margin-bottom:22px}
+  .hint-btn{width:44px;height:44px;font-size:17px}
+  .take-btn{font-size:11px;padding:8px 12px}
+  .chip{padding:6px 10px;font-size:11px}
+  .main-area{padding:80px 16px 90px;transform: translateY(0);}
+  .topbar{padding:12px 14px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== МЕНЮ ===== -->
+<div class="screen active" id="menu">
+  <div class="logo">КТО ХОЧЕТ СТАТЬ<br>МИЛЛИОНЕРОМ?</div>
+  <div class="sub">IT · Трейдинг · Финансы</div>
+  <button class="menu-btn primary" onclick="startGame()">▶ Начать игру</button>
+  <button class="menu-btn" onclick="showRecords()">🏆 Мой рекорд</button>
+  <div class="author">made by <b>kuvardin kirill</b></div>
+</div>
+
+<!-- ===== ИГРА ===== -->
+<div class="screen" id="game">
+  <div class="topbar">
+    <button class="take-btn" id="takeBtn" onclick="takeMoney()">💰 Забрать приз</button>
+    <div class="info-bar">
+      <div class="chip">Приз: <b id="prizeNow">0 ₽</b></div>
+      <div class="chip timer-chip" id="timerChip">⏱ <b id="timer">2:00</b></div>
+    </div>
+  </div>
+
+  <div class="main-area">
+    <div class="q-progress" id="qProgress">Вопрос 1 из 20</div>
+    <div class="q-number" id="qNumber">#1 · 1 000 ₽</div>
+    <div class="q-text" id="qText">Загрузка...</div>
+    <div class="answers" id="answers"></div>
+  </div>
+
+  <div class="hints" id="hints"></div>
+</div>
+
+<!-- ===== РЕЗУЛЬТАТ ===== -->
+<div class="screen" id="result">
+  <div class="res-title" id="resTitle">Игра окончена</div>
+  <div class="res-sum" id="resSum">0 ₽</div>
+  <div class="res-note" id="resNote"></div>
+  <button class="menu-btn primary" onclick="startGame()">🔄 Играть снова</button>
+  <button class="menu-btn" onclick="goMenu()">🏠 В меню</button>
+</div>
+
+<!-- ===== РЕКОРДЫ ===== -->
+<div class="screen" id="records">
+  <div class="res-title">🏆 Ваши рекорды</div>
+  <div class="rec-list" id="recList"></div>
+  <button class="menu-btn primary" onclick="goMenu()">← Назад</button>
+</div>
+
+<!-- ===== МОДАЛКА ===== -->
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <h3 id="modalTitle"></h3>
+    <p id="modalText"></p>
+    <button class="close" onclick="closeModal()">Понятно</button>
+  </div>
+</div>
+
+<script>
+// ========== БАЗА ВОПРОСОВ (50 штук) ==========
+const QUESTIONS_DB = [
+  {q:"Что такое «биткоин»?",a:["Валюта, выпускаемая центробанком","Первая криптовалюта, основанная на блокчейне","Тип банковского счёта","Фондовая биржа"],c:1},
+  {q:"Что означает аббревиатура «IPO»?",a:["Международная платёжная операция","Первичное публичное размещение акций","Индекс потребительских цен","Инвестиционный портфельный опцион"],c:1},
+  {q:"Какой язык программирования чаще всего используется для веб-разработки на стороне клиента?",a:["Python","C++","JavaScript","Rust"],c:2},
+  {q:"Что такое «бычий рынок» (bull market)?",a:["Рынок, где цены падают","Рынок, где цены растут","Рынок облигаций","Рынок, закрытый для торгов"],c:1},
+  {q:"Что такое «дивиденды»?",a:["Проценты по кредиту","Часть прибыли компании, выплачиваемая акционерам","Комиссия брокера","Налог на недвижимость"],c:1},
+  {q:"Какой протокол используется для безопасной передачи данных в интернете?",a:["FTP","HTTPS","SMTP","SSH"],c:1},
+  {q:"Что такое «инфляция»?",a:["Снижение цен","Рост покупательной способности денег","Обесценивание денег и рост цен","Увеличение зарплат"],c:2},
+  {q:"Что означает «S&P 500»?",a:["Фондовая биржа в Европе","Индекс 500 крупнейших американских компаний","Банковский счёт","Криптовалютный кошелёк"],c:1},
+  {q:"Что такое «блокчейн»?",a:["База данных, где записи сцеплены в блоки и защищены криптографией","Тип акции","Вид кредита","Метод банковского перевода"],c:0},
+  {q:"Какой из этих языков используется для анализа данных и машинного обучения?",a:["HTML","Python","CSS","SQL"],c:1},
+  {q:"Что такое «диверсификация» портфеля?",a:["Покупка акций только одной компании","Распределение инвестиций между разными активами для снижения риска","Вложение всех денег в криптовалюту","Продажа всех активов"],c:1},
+  {q:"Что означает «API»?",a:["Интерфейс программирования приложений","Тип акции","Метод шифрования","Вид налога"],c:0},
+  {q:"Что такое «облигация»?",a:["Доля в компании","Долговая ценная бумага, по которой платят процент","Криптовалюта","Тип страховки"],c:1},
+  {q:"Какой из этих компаний владеет GitHub?",a:["Google","Microsoft","Apple","Amazon"],c:1},
+  {q:"Что такое «хедж-фонд»?",a:["Фонд, который инвестирует только в золото","Инвестиционный фонд, использующий сложные стратегии для получения высокой доходности","Государственный пенсионный фонд","Фонд для благотворительности"],c:1},
+  {q:"Что означает «дедлайн» в разработке?",a:["Дата начала проекта","Крайний срок сдачи задачи","Тип тестирования","Язык программирования"],c:1},
+  {q:"Какой индекс считается главным индикатором фондового рынка США?",a:["Dow Jones","Nikkei","DAX","Hang Seng"],c:0},
+  {q:"Что такое «NFT»?",a:["Новый финансовый термин","Невзаимозаменяемый токен (уникальный цифровой актив)","Тип банковской карты","Вид облигации"],c:1},
+  {q:"Что означает «ликвидность» актива?",a:["Способность быстро продать актив без потери стоимости","Размер налога на актив","Уровень риска","Размер дивидендов"],c:0},
+  {q:"Что такое «маржинальная торговля»?",a:["Торговля с использованием заемных средств","Покупка только дешевых акций","Торговля на выходных","Покупка акций навсегда"],c:0},
+  {q:"Какой язык используется для создания стилей на веб-страницах?",a:["HTML","CSS","JavaScript","Python"],c:1},
+  {q:"Что такое «фиатные деньги»?",a:["Деньги, обеспеченные золотом","Деньги, ценность которых устанавливает государство (например, рубль или доллар)","Криптовалюта","Внутренняя валюта игры"],c:1},
+  {q:"Что такое «спред» (spread) в трейдинге?",a:["Разница между ценой покупки и продажи","Налог на прибыль","Комиссия за вывод средств","График цены"],c:0},
+  {q:"Что означает «баг» в программировании?",a:["Ошибка в коде","Новая функция","Тип базы данных","Опытный программист"],c:0},
+  {q:"Что такое «пассивный доход»?",a:["Доход, не требующий ежедневного активного труда","Зарплата на заводе","Кредит в банке","Налоговый вычет"],c:0},
+  {q:"Что такое «токен» в криптомире?",a:["Цифровой актив, выпущенный на базе блокчейна","Банковская карта","Билет на самолет","Государственная пошлина"],c:0},
+  {q:"Какой из этих инструментов является долговым?",a:["Акция","Облигация","Криптовалюта","Фьючерс"],c:1},
+  {q:"Что означает слово «open source» (открытый исходный код)?",a:["Платное программное обеспечение","Исходный код доступен для просмотра и изменения всем желающим","Закрытая система","Вирусная программа"],c:1},
+  {q:"Что такое «депозит»?",a:["Деньги, переданные в банк на хранение под проценты","Штраф за просрочку","Брокерская комиссия","Вид акции"],c:0},
+  {q:"Что такое «кибербезопасность»?",a:["Защита компьютерных систем и данных от атак","Ремонт компьютеров","Создание сайтов","Разработка игр"],c:0},
+  {q:"Что такое «акция» компании?",a:["Ценная бумага, дающая право на долю в компании","Долговая расписка","Тип страховки","Банковский вклад"],c:0},
+  {q:"Что такое «краудфандинг»?",a:["Коллективное финансирование проекта большим количеством людей","Крупный кредит от одного банка","Государственная субсидия","Игра на бирже"],c:0},
+  {q:"Что такое «фьючерс»?",a:["Контракт на покупку или продажу актива в будущем по фиксированной цене","Прошлый отчет компании","Тип акции","Вид криптовалюты"],c:0},
+  {q:"Что такое «рецессия» в экономике?",a:["Спад экономики","Быстрый рост экономики","Полная остановка торгов","Введение новой валюты"],c:0},
+  {q:"Для чего используется SQL?",a:["Для работы с базами данных","Для стилизации сайтов","Для создания игр","Для монтажа видео"],c:0},
+  {q:"Что такое «индекс» на бирже?",a:["Показатель, отражающий изменение группы акций","Название акции","Комиссия брокера","Курс валют"],c:0},
+  {q:"Что означает «смарт-контракт»?",a:["Программа, автоматически выполняющая условия сделки в блокчейне","Бумажный договор","Устное соглашение","Банковский перевод"],c:0},
+  {q:"Что такое «инвестирование»?",a:["Вложение денег для получения прибыли в будущем","Трата денег на развлечения","Хранение денег под подушкой","Оплата налогов"],c:0},
+  {q:"Что такое «облачное хранилище»?",a:["Серверы в интернете для хранения данных","Флешка","Жесткий диск в компьютере","Оперативная память"],c:0},
+  {q:"Что означает «просадка» (drawdown) в трейдинге?",a:["Снижение капитала от максимального значения","Рост депозита","Удаление торгового счета","Смена брокера"],c:0},
+  {q:"Что такое «фишинг»?",a:["Вид интернет-мошенничества для кражи данных","Рыбалка в интернете","Способ заработка на бирже","Тип криптовалюты"],c:0},
+  {q:"Что такое «венчурные инвестиции»?",a:["Вложения в новые и рискованные стартапы","Покупка государственных облигаций","Вложение в золото","Кредит для пенсионеров"],c:0},
+  {q:"Что такое «операционная система»?",a:["Базовое ПО для управления компьютером (Windows, macOS, Linux)","Текстовый редактор","Браузер","Антивирус"],c:0},
+  {q:"Что такое «дивидендная доходность»?",a:["Отношение дивидендов к цене акции","Процент по кредиту","Налог на прибыль","Курс валюты"],c:0},
+  {q:"Что такое «мемкоин»?",a:["Криптовалюта, созданная ради шутки или хайпа","Государственная валюта","Облигация крупной компании","Иностранная акция"],c:0},
+  {q:"Что такое «депозитный портфель»?",a:["Совокупность всех инвестиционных активов","Кошелек с наличными","Банковская карта","Кредитный договор"],c:0},
+  {q:"Что означает «аптайм» (uptime) сервера?",a:["Время бесперебойной работы","Время простоя","Скорость интернета","Объем памяти"],c:0},
+    ,
+  {q:"Что такое «аирдроп» (airdrop) в криптовалютах?",a:["Бесплатная раздача токенов для привлечения внимания","Падение курса монеты","Взлом кошелька","Обмен одной валюты на другую"],c:0},
+  {q:"Что означает термин «медвежий рынок» (bear market)?",a:["Рынок, на котором цены падают","Рынок, на котором цены растут","Рынок с нулевой волатильностью","Рынок редких активов"],c:0},
+  {q:"Что такое «майнинг» криптовалют?",a:["Процесс создания новых блоков и получения награды","Покупка монет на бирже","Перевод денег на карту","Взлом чужого аккаунта"],c:0},
+  {q:"Что такое «инвестиционный портфель»?",a:["Набор различных финансовых активов инвестора","Банковская ячейка для документов","Кредитная история","Список долгов"],c:0},
+  {q:"Что такое «биржа» простыми словами?",a:["Площадка для заключения сделок купли-продажи","Магазин с фиксированными ценами","Банковское отделение","Точка обмена валюты в аэропорту"],c:0},
+  {q:"Что значит «купить на дне» (catch the bottom)?",a:["Купить актив по самой низкой цене перед ростом","Купить акции упавшей компании","Совершить покупку на последние деньги","Купить акции на бирже в подвале"],c:0},
+  {q:"Что такое «шорт» (short selling) на бирже?",a:["Продажа актива, взятого в долг, с расчетом купить его дешевле","Покупка акций на короткий срок","Быстрая сделка на 1 минуту","Покупка только дешевых акций"],c:0},
+  {q:"Что такое «кэшбэк»?",a:["Возврат части потраченных денег","Штраф за просрочку","Плата за обслуживание карты","Вид кредита"],c:0},
+  {q:"Что означает «венчурный капиталист»?",a:["Инвестор, вкладывающий в рискованные стартапы","Банкир","Человек, дающий кредиты под залог","Трейдер на валютной бирже"],c:0},
+  {q:"Что такое «IT-инфраструктура»?",a:["Комплекс аппаратного и программного обеспечения компании","Офисное здание","Отдел кадров","Серверная комната"],c:0},
+  {q:"Что делает «бэкенд-разработчик»?",a:["Создает серверную логику и базы данных","Рисует дизайн интерфейсов","Тестирует игры","Пишет тексты для сайта"],c:0},
+  {q:"Что такое «фронтенд» (frontend)?",a:["Клиентская часть веб-приложения, с которой взаимодействует пользователь","Серверная часть сайта","База данных","Настройки сервера"],c:0},
+  {q:"Что такое «киберсквоттинг»?",a:["Регистрация доменов на чужие бренды с целью перепродажи","Создание вирусов","Взлом баз данных","Кража паролей"],c:0},
+  {q:"Что такое «дефолт» в финансах?",a:["Неспособность заемщика выплатить долг","Рост фондового рынка","Повышение налогов","Инфляция"],c:0},
+  {q:"Что такое «финансовая подушка безопасности»?",a:["Денежный резерв на случай непредвиденных ситуаций","Подушка для сна","Кредитная карта","Инвестиции в акции"],c:0},
+  {q:"Что такое «сложный процент»?",a:["Начисление процентов на проценты","Налог на прибыль","Комиссия за перевод","Плата за ипотеку"],c:0},
+  {q:"Что означает термин «хакер»?",a:["Специалист по взлому компьютерных систем","Программист-любитель","Сисадмин","Инженер"],c:0},
+  {q:"Что такое «денежный поток» (cash flow)?",a:["Движение денег (поступления и расходы)","Курс валют","Размер зарплаты","Банковский счет"],c:0},
+  {q:"Что такое «блокчейн-кошелек»?",a:["Программа или устройство для хранения криптовалюты","Пластиковая карта","Бумажный чек","Сейф в банке"],c:0},
+  {q:"Что такое «защита от DDOS-атак»?",a:["Способ защиты сервера от перегрузки","Установка антивируса на компьютер","Шифрование данных","Копирование файлов"],c:0},
+  {q:"Что означает «высокая волатильность» актива?",a:["Большие и резкие колебания цены","Стабильный рост","Низкий риск","Отсутствие торгов"],c:0},
+  {q:"Что такое «скам» (scam) в криптоиндустрии?",a:["Мошеннический проект для кражи денег","Новая технология","Вид майнинга","Популярная биржа"],c:0},
+  {q:"Что такое «гибридная работа»?",a:["Совмещение работы в офисе и удаленной работы","Работа на двух работах сразу","Работа без выходных","Работа по ночам"],c:0},
+  {q:"Что такое «локальная сеть» (LAN)?",a:["Сеть, объединяющая устройства в пределах одного помещения","Интернет","Глобальная сеть","Беспроводная сеть"],c:0},
+  {q:"Что такое «дашборд» в IT?",a:["Панель мониторинга с ключевыми показателями","Графический редактор","Тип базы данных","Серверная программа"],c:0},
+  {q:"Что такое «финансовый пузырь»?",a:["Ситуация, когда цена актива сильно превышает его реальную стоимость","Рост экономики","Инфляция","Кредитный рейтинг"],c:0},
+  {q:"Что такое «краткосрочные инвестиции»?",a:["Вложения на срок до 1 года","Вложения на 10-20 лет","Покупка недвижимости","Пенсионные накопления"],c:0},
+  {q:"Что означает «юзабилити» (usability)?",a:["Удобство использования продукта","Скорость работы","Защита данных","Цена продукта"],c:0}
+];
+
+// ========== ПРИЗЫ (20 вопросов, до 1 000 000) ==========
+const PRIZES = [
+  1000, 2000, 5000, 10000, 20000,
+  50000, 75000, 100000, 150000, 200000,
+  250000, 300000, 350000, 400000, 500000,
+  600000, 700000, 800000, 900000, 1000000
+];
+const SAFE_INDEX = 9; // 10-й вопрос (индекс 9) = 200 000 ₽ несгораемая
+
+// ========== ПЕРЕМЕННЫЕ ИГРЫ ==========
+let gameQuestions = [];
+let state = {
+  current: 0,
+  hintsLeft: {fifty:1, call:1, hall:1, swap:1, x2:1},
+  lockedPrize: 0,
+  usedX2: false,
+  timer: null,
+  timeLeft: 120,
+  answered: false
+};
+
+function fmt(n){return n.toLocaleString('ru-RU')+' ₽'}
+
+// Функция перемешивания массива (Фишер-Йетс)
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+// ========== ЗВУКИ ==========
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function initAudio(){
+  if(!audioCtx) audioCtx = new AudioCtx();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playTone(freq, dur=0.15, type='sine', vol=0.08){
+  if(!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + dur);
+}
+
+function soundClick(){ playTone(600,0.08,'square',0.04); }
+function soundCorrect(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>playTone(f,0.2,'sine',0.1),i*90)); }
+function soundWrong(){ [220,180,150,100].forEach((f,i)=>setTimeout(()=>playTone(f,0.35,'sawtooth',0.1),i*100)); }
+function soundWin(){ [523,659,784,1046,1318,1568].forEach((f,i)=>setTimeout(()=>playTone(f,0.4,'sine',0.12),i*120)); }
+function soundHint(){ playTone(880,0.12,'triangle',0.06); }
+
+let bgOsc = null, bgGain = null;
+function startBgMusic(){
+  if(!audioCtx || bgOsc) return;
+  bgOsc = audioCtx.createOscillator();
+  bgGain = audioCtx.createGain();
+  bgOsc.type = 'sine';
+  bgOsc.frequency.value = 55;
+  bgGain.gain.value = 0.02;
+  bgOsc.connect(bgGain).connect(audioCtx.destination);
+  bgOsc.start();
+  const lfo = audioCtx.createOscillator();
+  const lfoGain = audioCtx.createGain();
+  lfo.frequency.value = 0.15;
+  lfoGain.gain.value = 0.012;
+  lfo.connect(lfoGain).connect(bgGain.gain);
+  lfo.start();
+}
+function stopBgMusic(){
+  if(bgOsc){ try{bgOsc.stop()}catch(e){} bgOsc=null; }
+  if(bgGain){ try{bgGain.disconnect()}catch(e){} bgGain=null; }
+}
+
+// ========== НАВИГАЦИЯ ==========
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goMenu(){ stopTimer(); stopBgMusic(); show('menu'); }
+
+// ========== СТАРТ ИГРЫ ==========
+function startGame(){
+  initAudio();
+  
+  // 1. Берем копию всех вопросов
+  let pool = [...QUESTIONS_DB];
+  // 2. Перемешиваем их
+  shuffle(pool);
+  // 3. Берем первые 20 вопросов для этой игры
+  gameQuestions = pool.slice(0, 20);
+
+  // Перемешиваем ответы внутри каждого выбранного вопроса
+  gameQuestions.forEach(q => {
+    const correctText = q.a[q.c]; // запоминаем правильный ответ
+    shuffle(q.a);                 // мешаем варианты
+    q.c = q.a.indexOf(correctText); // находим новый индекс правильного ответа
+  });
+
+  state.current = 0;
+  state.hintsLeft = {fifty:1, call:1, hall:1, swap:1, x2:1};
+  state.lockedPrize = 0;
+  state.usedX2 = false;
+  state.answered = false;
+  document.getElementById('takeBtn').disabled = false;
+  document.getElementById('prizeNow').textContent = '0 ₽';
+  renderHints();
+  show('game');
+  startBgMusic();
+  loadQuestion();
+}
+
+function loadQuestion(){
+  const q = gameQuestions[state.current];
+  state.answered = false;
+  state.timeLeft = 120;
+  updateTimerDisplay();
+
+  document.getElementById('qProgress').textContent = `Вопрос ${state.current+1} из ${gameQuestions.length}`;
+  document.getElementById('qNumber').textContent = `#${state.current+1} · ${fmt(PRIZES[state.current])}`;
+  document.getElementById('qText').textContent = q.q;
+
+  const answersEl = document.getElementById('answers');
+  answersEl.innerHTML = '';
+  const keys = ['A','B','C','D'];
+  q.a.forEach((text, i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'answer';
+    btn.innerHTML = `<span class="key">${keys[i]}</span><span>${text}</span>`;
+    btn.onclick = ()=>chooseAnswer(i);
+    answersEl.appendChild(btn);
+  });
+
+  startTimer();
+}
+
+// ========== ТАЙМЕР ==========
+function startTimer(){
+  stopTimer();
+  state.timer = setInterval(()=>{
+    state.timeLeft--;
+    updateTimerDisplay();
+    if(state.timeLeft <= 0){
+      stopTimer();
+      if(!state.answered) timeOut();
+    }
+  },1000);
+}
+function stopTimer(){
+  if(state.timer){ clearInterval(state.timer); state.timer = null; }
+}
+function updateTimerDisplay(){
+  const m = Math.floor(state.timeLeft/60);
+  const s = state.timeLeft%60;
+  document.getElementById('timer').textContent = `${m}:${String(s).padStart(2,'0')}`;
+  const chip = document.getElementById('timerChip');
+  if(state.timeLeft <= 30) chip.classList.add('warn');
+  else chip.classList.remove('warn');
+}
+function timeOut(){
+  finishGame(false, state.lockedPrize, 'Время вышло!');
+}
+
+// ========== ВЫБОР ОТВЕТА ==========
+function chooseAnswer(index){
+  if(state.answered) return;
+  state.answered = true;
+  stopTimer();
+  soundClick();
+
+  const q = gameQuestions[state.current];
+  const buttons = document.querySelectorAll('.answer');
+  buttons.forEach(b=>b.disabled = true);
+
+  if(index === q.c){
+    buttons[index].classList.add('correct');
+    soundCorrect();
+    setTimeout(()=>{
+      if(state.current === gameQuestions.length - 1){
+        finishGame(true, PRIZES[PRIZES.length-1], 'Поздравляем с победой!');
+        return;
+      }
+      if(state.current === SAFE_INDEX) state.lockedPrize = PRIZES[SAFE_INDEX];
+      state.current++;
+      document.getElementById('prizeNow').textContent = fmt(state.usedX2 ? PRIZES[state.current-1]*2 : PRIZES[state.current-1]);
+      setTimeout(loadQuestion, 400);
+    }, 900);
+  } else {
+    buttons[index].classList.add('wrong');
+    buttons[q.c].classList.add('correct');
+    soundWrong();
+    setTimeout(()=>{
+      finishGame(false, state.lockedPrize, 'Неправильный ответ!');
+    }, 1400);
+  }
+}
+
+// ========== ФИНАЛ ==========
+function finishGame(win, amount, note){
+  stopTimer();
+  stopBgMusic();
+  if(win) soundWin();
+  else soundWrong();
+
+  const title = document.getElementById('resTitle');
+  title.textContent = win ? '🏆 ПОБЕДА!' : 'Игра окончена';
+  title.className = 'res-title ' + (win ? 'win' : 'lose');
+  document.getElementById('resSum').textContent = fmt(amount);
+  document.getElementById('resNote').textContent = win
+    ? 'Вы ответили на все 20 вопросов и выиграли максимальный приз!'
+    : note + ` Ваш выигрыш: ${fmt(amount)}`;
+
+  saveRecord(amount);
+  show('result');
+}
+
+function takeMoney(){
+  if(state.answered) return;
+  const amount = state.current === 0 ? 0 : PRIZES[state.current - 1];
+  if(amount === 0){
+    if(!confirm('Вы пока не ответили ни на один вопрос. Точно выйти?')) return;
+    goMenu();
+    return;
+  }
+  if(!confirm(`Забрать ${fmt(state.usedX2 ? amount*2 : amount)} и выйти?`)) return;
+  finishGame(false, state.usedX2 ? amount*2 : amount, 'Вы забрали приз.');
+}
+
+// ========== ПОДСКАЗКИ ==========
+function renderHints(){
+  const hintsEl = document.getElementById('hints');
+  const defs = [
+    {key:'fifty', icon:'½', title:'50/50'},
+    {key:'call', icon:'📞', title:'Звонок другу'},
+    {key:'hall', icon:'👥', title:'Помощь зала'},
+    {key:'swap', icon:'🔄', title:'Замена вопроса'},
+    {key:'x2', icon:'✕2', title:'Удвоение приза'}
+  ];
+  hintsEl.innerHTML = '';
+  defs.forEach(d=>{
+    const btn = document.createElement('button');
+    btn.className = 'hint-btn';
+    btn.title = d.title;
+    btn.innerHTML = `${d.icon}<span class="count">${state.hintsLeft[d.key]}</span>`;
+    btn.disabled = state.hintsLeft[d.key] <= 0;
+    btn.onclick = ()=>useHint(d.key);
+    hintsEl.appendChild(btn);
+  });
+}
+
+function useHint(key){
+  if(state.answered) return;
+  if(state.hintsLeft[key] <= 0) return;
+  initAudio();
+  soundHint();
+  state.hintsLeft[key]--;
+
+  const q = gameQuestions[state.current];
+  const buttons = document.querySelectorAll('.answer');
+
+  if(key === 'fifty'){
+    const wrongs = [0,1,2,3].filter(i=>i!==q.c);
+    wrongs.sort(()=>Math.random()-0.5);
+    wrongs.slice(0,2).forEach(i=>buttons[i].classList.add('hidden'));
+  }
+  else if(key === 'call'){
+    const correct = Math.random() < 0.8;
+    const pick = correct ? q.c : [0,1,2,3].filter(i=>i!==q.c)[Math.floor(Math.random()*3)];
+    const keys = ['A','B','C','D'];
+    showModal('📞 Звонок другу', `Друг говорит: «Я думаю, правильный ответ — ${keys[pick]}. Но я не уверен на 100%.»`);
+  }
+  else if(key === 'hall'){
+    const votes = [0,0,0,0];
+    const correctShare = 50 + Math.floor(Math.random()*21);
+    votes[q.c] = correctShare;
+    let rest = 100 - correctShare;
+    const wrongs = [0,1,2,3].filter(i=>i!==q.c);
+    wrongs.forEach((i,idx)=>{
+      if(idx === wrongs.length-1) votes[i] = rest;
+      else { const v = Math.floor(Math.random()*rest); votes[i]=v; rest-=v; }
+    });
+    const keys = ['A','B','C','D'];
+    const text = keys.map((k,i)=>`${k}: ${votes[i]}%`).join(' · ');
+    showModal('👥 Помощь зала', `Зал голосует так: ${text}`);
+  }
+  else if(key === 'swap'){
+    // Берем случайный вопрос из базы, которого нет в текущей игре
+    let remainingPool = QUESTIONS_DB.filter(dbQ => !gameQuestions.some(gQ => gQ.q === dbQ.q));
+    
+    // Если вдруг все вопросы уже использованы (маловероятно), просто берем любой
+    let newQ = remainingPool.length > 0 
+      ? remainingPool[Math.floor(Math.random()*remainingPool.length)] 
+      : QUESTIONS_DB[Math.floor(Math.random()*QUESTIONS_DB.length)];
+
+    // Клонируем, чтобы не менять оригинал
+    let qCopy = JSON.parse(JSON.stringify(newQ));
+    
+    // Перемешиваем ответы
+    const correctText = qCopy.a[qCopy.c];
+    shuffle(qCopy.a);
+    qCopy.c = qCopy.a.indexOf(correctText);
+
+    // Заменяем текущий вопрос
+    gameQuestions[state.current] = qCopy;
+    loadQuestion();
+    return;
+  }
+  else if(key === 'x2'){
+    if(state.usedX2){ showModal('✕2', 'Удвоение уже использовано.'); return; }
+    state.usedX2 = true;
+    showModal('✕2', 'Приз за этот вопрос удвоен! Если ответите правильно — получите двойную сумму.');
+  }
+
+  renderHints();
+}
+
+function showModal(title, text){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalText').textContent = text;
+  document.getElementById('modal').classList.add('active');
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('active');
+}
+
+// ========== РЕКОРДЫ ==========
+function saveRecord(amount){
+  const recs = JSON.parse(localStorage.getItem('millionaire_records') || '[]');
+  recs.push({amount, date:new Date().toLocaleString('ru-RU')});
+  recs.sort((a,b)=>b.amount - a.amount);
+  localStorage.setItem('millionaire_records', JSON.stringify(recs.slice(0,10)));
+}
+function showRecords(){
+  const recs = JSON.parse(localStorage.getItem('millionaire_records') || '[]');
+  const list = document.getElementById('recList');
+  if(recs.length === 0){
+    list.innerHTML = '<div class="rec-empty">Пока нет рекордов. Сыграйте первую игру!</div>';
+  } else {
+    list.innerHTML = recs.map((r,i)=>
+      `<div class="rec-item"><span class="pos">#${i+1}</span><span>${r.date}</span><span class="money">${fmt(r.amount)}</span></div>`
+    ).join('');
+  }
+  show('records');
+}
+
+// ========== УПРАВЛЕНИЕ ==========
+document.addEventListener('keydown', e=>{
+  if(!document.getElementById('game').classList.contains('active')) return;
+  if(state.answered) return;
+  const map = {'1':0,'2':1,'3':2,'4':3,'a':0,'b':1,'c':2,'d':3,'а':0,'б':1,'в':2,'г':3};
+  const k = e.key.toLowerCase();
+  if(map[k] !== undefined){
+    const btn = document.querySelectorAll('.answer')[map[k]];
+    if(btn && !btn.classList.contains('hidden')) btn.click();
+  }
+});
+
+document.addEventListener('click', initAudio, {once:true});
+</script>
+</body>
+</html>
