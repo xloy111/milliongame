@@ -2,8 +2,10 @@
   "name": "Кто хочет стать миллионером?",
   "short_name": "Миллионер",
   "description": "Викторина про IT, трейдинг и финансы",
-  "start_url": "quiz.html",
+  "start_url": "./",
+  "id": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0a0620",
   "theme_color": "#7b5cff",
   "icons": [
